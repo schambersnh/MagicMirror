@@ -1,0 +1,20 @@
+{
+	"name": "down-payment-saver",
+	"version": "1.0.0",
+	"description": "MagicMirror Module for displaying down payment savings progress in a 2D house format",
+	"main": "down-payment-saver.js",
+	"repository": "https://github.com/schambersnh/down-payment-saver",
+	"keywords": [
+		"down payment saver",
+		"down paymnet",
+		"house"
+	],
+	"author": "schambersnh",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/schambersnh/down-payment-saver/issues"
+	},
+	"dependencies": {
+		"google-spreadsheet": "^3.1.15"
+	}
+}
