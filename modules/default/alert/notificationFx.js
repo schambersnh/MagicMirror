@@ -122,10 +122,8 @@
 
 	/**
 	 * Dismiss the notification
-	 *
-	 * @param {boolean} [close] call the onClose callback at the end
 	 */
-	NotificationFx.prototype.dismiss = function (close = true) {
+	NotificationFx.prototype.dismiss = function () {
 		this.active = false;
 		clearTimeout(this.dismissttl);
 		this.ntf.classList.remove("ns-show");
@@ -133,7 +131,7 @@
 			this.ntf.classList.add("ns-hide");
 
 			// callback
-			if (close) this.options.onClose();
+			this.options.onClose();
 		}, 25);
 
 		// after animation ends remove ntf from the DOM

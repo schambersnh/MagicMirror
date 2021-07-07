@@ -14,30 +14,20 @@ WeatherProvider.register("openweathermap", {
 	// But for debugging (and future alerts) it would be nice to have the real name.
 	providerName: "OpenWeatherMap",
 
-	// Set the default config properties that is specific to this provider
-	defaults: {
-		apiVersion: "2.5",
-		apiBase: "https://api.openweathermap.org/data/",
-		weatherEndpoint: "",
-		locationID: false,
-		location: false,
-		lat: 0,
-		lon: 0,
-		apiKey: ""
-	},
-
 	// Overwrite the fetchCurrentWeather method.
 	fetchCurrentWeather() {
 		this.fetchData(this.getUrl())
 			.then((data) => {
-				if (this.config.weatherEndpoint === "/onecall") {
-					const weatherData = this.generateWeatherObjectsFromOnecall(data);
-					this.setCurrentWeather(weatherData.current);
-					this.setFetchedLocation(`${data.timezone}`);
-				} else {
-					const currentWeather = this.generateWeatherObjectFromCurrentWeather(data);
-					this.setCurrentWeather(currentWeather);
+				if (!data || !data.main || typeof data.main.temp === "undefined") {
+					// Did not receive usable new data.
+					// Maybe this needs a better check?
+					return;
 				}
+
+				this.setFetchedLocation(`${data.name}, ${data.sys.country}`);
+
+				const currentWeather = this.generateWeatherObjectFromCurrentWeather(data);
+				this.setCurrentWeather(currentWeather);
 			})
 			.catch(function (request) {
 				Log.error("Could not load data ... ", request);
@@ -49,15 +39,16 @@ WeatherProvider.register("openweathermap", {
 	fetchWeatherForecast() {
 		this.fetchData(this.getUrl())
 			.then((data) => {
-				if (this.config.weatherEndpoint === "/onecall") {
-					const weatherData = this.generateWeatherObjectsFromOnecall(data);
-					this.setWeatherForecast(weatherData.days);
-					this.setFetchedLocation(`${data.timezone}`);
-				} else {
-					const forecast = this.generateWeatherObjectsFromForecast(data.list);
-					this.setWeatherForecast(forecast);
-					this.setFetchedLocation(`${data.city.name}, ${data.city.country}`);
+				if (!data || !data.list || !data.list.length) {
+					// Did not receive usable new data.
+					// Maybe this needs a better check?
+					return;
 				}
+
+				this.setFetchedLocation(`${data.city.name}, ${data.city.country}`);
+
+				const forecast = this.generateWeatherObjectsFromForecast(data.list);
+				this.setWeatherForecast(forecast);
 			})
 			.catch(function (request) {
 				Log.error("Could not load data ... ", request);
@@ -65,8 +56,8 @@ WeatherProvider.register("openweathermap", {
 			.finally(() => this.updateAvailable());
 	},
 
-	// Overwrite the fetchWeatherHourly method.
-	fetchWeatherHourly() {
+	// Overwrite the fetchWeatherData method.
+	fetchWeatherData() {
 		this.fetchData(this.getUrl())
 			.then((data) => {
 				if (!data) {
@@ -78,37 +69,12 @@ WeatherProvider.register("openweathermap", {
 				this.setFetchedLocation(`(${data.lat},${data.lon})`);
 
 				const weatherData = this.generateWeatherObjectsFromOnecall(data);
-				this.setWeatherHourly(weatherData.hours);
+				this.setWeatherData(weatherData);
 			})
 			.catch(function (request) {
 				Log.error("Could not load data ... ", request);
 			})
 			.finally(() => this.updateAvailable());
-	},
-
-	/**
-	 * Overrides method for setting config to check if endpoint is correct for hourly
-	 *
-	 * @param config
-	 */
-	setConfig(config) {
-		this.config = config;
-		if (!this.config.weatherEndpoint) {
-			switch (this.config.type) {
-				case "hourly":
-					this.config.weatherEndpoint = "/onecall";
-					break;
-				case "daily":
-				case "forecast":
-					this.config.weatherEndpoint = "/forecast";
-					break;
-				case "current":
-					this.config.weatherEndpoint = "/weather";
-					break;
-				default:
-					Log.error("weatherEndpoint not configured and could not resolve it based on type");
-			}
-		}
 	},
 
 	/** OpenWeatherMap Specific Methods - These are not part of the default provider methods */
@@ -462,8 +428,6 @@ WeatherProvider.register("openweathermap", {
 			} else {
 				params += "&exclude=minutely";
 			}
-		} else if (this.config.lat && this.config.lon) {
-			params += "lat=" + this.config.lat + "&lon=" + this.config.lon;
 		} else if (this.config.locationID) {
 			params += "id=" + this.config.locationID;
 		} else if (this.config.location) {

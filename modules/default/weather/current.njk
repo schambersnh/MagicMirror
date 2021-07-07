@@ -1,4 +1,7 @@
-{% if current %}
+{% if current or weatherData %}
+    {% if weatherData %}
+        {% set current = weatherData.current %}
+    {% endif %}
     {% if not config.onlyTemp %}
         <div class="normal medium">
             <span class="wi wi-strong-wind dimmed"></span>
@@ -63,10 +66,13 @@
         {% endif %}
     </div>
     {% if (config.showFeelsLike or config.showPrecipitationAmount) and not config.onlyTemp %}
-        <div class="normal medium feelslike">
+        <div class="normal medium">
             {% if config.showFeelsLike %}
                 <span class="dimmed">
-                    {{ "FEELS" | translate({DEGREE: current.feelsLike() | roundValue | unit("temperature") | decimalSymbol }) }}
+                    {{ "FEELS" | translate({DEGREE: current.feelsLike() | roundValue | unit("temperature") | decimalSymbol }) }} 
+					{% if not config.feelsLikeWithDegree %}
+					{{ current.feelsLike() | roundValue | unit("temperature") | decimalSymbol }}
+					{% endif %}
                 </span>
             {% endif %}
             {% if config.showPrecipitationAmount %}
@@ -78,7 +84,7 @@
     {% endif %}
 {% else %}
     <div class="dimmed light small">
-        {{ "LOADING" | translate }}
+        {{ "LOADING" | translate | safe }}
     </div>
 {% endif %}
 

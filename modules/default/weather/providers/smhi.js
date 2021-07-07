@@ -14,13 +14,6 @@
 WeatherProvider.register("smhi", {
 	providerName: "SMHI",
 
-	// Set the default config properties that is specific to this provider
-	defaults: {
-		lat: 0,
-		lon: 0,
-		precipitationValue: "pmedian"
-	},
-
 	/**
 	 * Implements method in interface for fetching current weather
 	 */
@@ -62,7 +55,7 @@ WeatherProvider.register("smhi", {
 		this.config = config;
 		if (!config.precipitationValue || ["pmin", "pmean", "pmedian", "pmax"].indexOf(config.precipitationValue) == -1) {
 			console.log("invalid or not set: " + config.precipitationValue);
-			config.precipitationValue = this.defaults.precipitationValue;
+			config.precipitationValue = "pmedian";
 		}
 	},
 
@@ -74,7 +67,7 @@ WeatherProvider.register("smhi", {
 	getClosestToCurrentTime(times) {
 		let now = moment();
 		let minDiff = undefined;
-		for (const time of times) {
+		for (time of times) {
 			let diff = Math.abs(moment(time.validTime).diff(now));
 			if (!minDiff || diff < Math.abs(moment(minDiff.validTime).diff(now))) {
 				minDiff = time;
@@ -149,13 +142,13 @@ WeatherProvider.register("smhi", {
 	 * @param coordinates
 	 */
 	convertWeatherDataGroupedByDay(allWeatherData, coordinates) {
-		let currentWeather;
+		var currentWeather;
 		let result = [];
 
 		let allWeatherObjects = this.fillInGaps(allWeatherData).map((weatherData) => this.convertWeatherDataToObject(weatherData, coordinates));
-		let dayWeatherTypes = [];
+		var dayWeatherTypes = [];
 
-		for (const weatherObject of allWeatherObjects) {
+		for (weatherObject of allWeatherObjects) {
 			//If its the first object or if a day change we need to reset the summary object
 			if (!currentWeather || !currentWeather.date.isSame(weatherObject.date, "day")) {
 				currentWeather = new WeatherObject(this.config.units, this.config.tempUnits, this.config.windUnits);
@@ -216,12 +209,12 @@ WeatherProvider.register("smhi", {
 	 */
 	fillInGaps(data) {
 		let result = [];
-		for (const i = 1; i < data.length; i++) {
+		for (var i = 1; i < data.length; i++) {
 			let to = moment(data[i].validTime);
 			let from = moment(data[i - 1].validTime);
 			let hours = moment.duration(to.diff(from)).asHours();
 			// For each hour add a datapoint but change the validTime
-			for (const j = 0; j < hours; j++) {
+			for (var j = 0; j < hours; j++) {
 				let current = Object.assign({}, data[i]);
 				current.validTime = from.clone().add(j, "hours").toISOString();
 				result.push(current);

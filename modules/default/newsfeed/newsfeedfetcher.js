@@ -4,10 +4,9 @@
  * By Michael Teeuw https://michaelteeuw.nl
  * MIT Licensed.
  */
-const Log = require("logger");
+const Log = require("../../../js/logger.js");
 const FeedMe = require("feedme");
-const NodeHelper = require("node_helper");
-const fetch = require("node-fetch");
+const request = require("request");
 const iconv = require("iconv-lite");
 
 /**
@@ -20,6 +19,8 @@ const iconv = require("iconv-lite");
  * @class
  */
 const NewsfeedFetcher = function (url, reloadInterval, encoding, logFeedWarnings) {
+	const self = this;
+
 	let reloadTimer = null;
 	let items = [];
 
@@ -35,14 +36,14 @@ const NewsfeedFetcher = function (url, reloadInterval, encoding, logFeedWarnings
 	/**
 	 * Request the new items.
 	 */
-	const fetchNews = () => {
+	const fetchNews = function () {
 		clearTimeout(reloadTimer);
 		reloadTimer = null;
 		items = [];
 
 		const parser = new FeedMe();
 
-		parser.on("item", (item) => {
+		parser.on("item", function (item) {
 			const title = item.title;
 			let description = item.description || item.summary || item.content || "";
 			const pubdate = item.pubdate || item.published || item.updated || item["dc:date"];
@@ -67,32 +68,33 @@ const NewsfeedFetcher = function (url, reloadInterval, encoding, logFeedWarnings
 			}
 		});
 
-		parser.on("end", () => {
-			this.broadcastItems();
+		parser.on("end", function () {
+			self.broadcastItems();
 			scheduleTimer();
 		});
 
-		parser.on("error", (error) => {
-			fetchFailedCallback(this, error);
+		parser.on("error", function (error) {
+			fetchFailedCallback(self, error);
 			scheduleTimer();
 		});
 
 		const nodeVersion = Number(process.version.match(/^v(\d+\.\d+)/)[1]);
-		const headers = {
-			"User-Agent": "Mozilla/5.0 (Node.js " + nodeVersion + ") MagicMirror/" + global.version + " (https://github.com/MichMich/MagicMirror/)",
-			"Cache-Control": "max-age=0, no-cache, no-store, must-revalidate",
-			Pragma: "no-cache"
+		const opts = {
+			headers: {
+				"User-Agent": "Mozilla/5.0 (Node.js " + nodeVersion + ") MagicMirror/" + global.version + " (https://github.com/MichMich/MagicMirror/)",
+				"Cache-Control": "max-age=0, no-cache, no-store, must-revalidate",
+				Pragma: "no-cache"
+			},
+			encoding: null
 		};
 
-		fetch(url, { headers: headers })
-			.then(NodeHelper.checkFetchStatus)
-			.then((response) => {
-				response.body.pipe(iconv.decodeStream(encoding)).pipe(parser);
-			})
-			.catch((error) => {
-				fetchFailedCallback(this, error);
+		request(url, opts)
+			.on("error", function (error) {
+				fetchFailedCallback(self, error);
 				scheduleTimer();
-			});
+			})
+			.pipe(iconv.decodeStream(encoding))
+			.pipe(parser);
 	};
 
 	/**
@@ -134,7 +136,7 @@ const NewsfeedFetcher = function (url, reloadInterval, encoding, logFeedWarnings
 			return;
 		}
 		Log.info("Newsfeed-Fetcher: Broadcasting " + items.length + " items.");
-		itemsReceivedCallback(this);
+		itemsReceivedCallback(self);
 	};
 
 	this.onReceive = function (callback) {
