@@ -2,6 +2,11 @@ var NodeHelper = require("node_helper");
 var fs = require("fs");
 var path = require("path");
 
+// Electron 11 bundles Node v12 which lacks native fetch
+if (!globalThis.fetch) {
+	globalThis.fetch = require("node-fetch");
+}
+
 const MONARCH_GQL_WEB = "https://api.monarch.com/graphql";
 const MONARCH_GQL_API = "https://api.monarchmoney.com/graphql";
 const MONARCH_LOGIN = "https://api.monarchmoney.com/auth/login/";
