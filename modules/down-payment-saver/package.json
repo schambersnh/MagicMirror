@@ -15,6 +15,6 @@
 		"url": "https://github.com/schambersnh/down-payment-saver/issues"
 	},
 	"dependencies": {
-		"google-spreadsheet": "^3.1.15"
+		"otplib": "^13.4.1"
 	}
 }

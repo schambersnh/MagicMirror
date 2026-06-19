@@ -1,5 +1,6 @@
 Module.register("down-payment-saver", {
 	accountBalance: 0,
+	totalDebt: 0,
 
 	//override dom generator
 	getDom: function () {
@@ -21,7 +22,7 @@ Module.register("down-payment-saver", {
 
 		let rectangle = this.drawBase(context, wrapperWidth, wrapperHeight);
 		this.drawRoof(context, rectangle);
-		this.drawBricks(context, rectangle, this.config.goal);
+		this.drawBricks(context, rectangle, this.totalDebt);
 
 		wrapper.appendChild(canv);
 		return wrapper;
@@ -47,7 +48,8 @@ Module.register("down-payment-saver", {
 
 	socketNotificationReceived: function (notification, payload) {
 		if (notification === "account_balance") {
-			this.accountBalance = payload.accountBalance;
+			this.accountBalance = payload.robinhoodBalance;
+			this.totalDebt = payload.totalDebt;
 			this.updateDom();
 		}
 	},
