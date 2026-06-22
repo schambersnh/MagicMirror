@@ -166,9 +166,8 @@ Module.register("down-payment-saver", {
 		let brickXLocation = rectangle.xLocation;
 		let brickYLocation = rectangle.yLocation + rectangle.height - brickHeight;
 
-		this.drawBrick(context, brickXLocation, brickYLocation, brickWidth, brickHeight);
-		for (let i = 0; i < this.accountBalance; i += oneBrick) {
-			if (i !== 0 && bricksDrawn % 10 === 0) {
+		for (let i = oneBrick; i <= this.accountBalance; i += oneBrick) {
+			if (bricksDrawn > 0 && bricksDrawn % 10 === 0) {
 				//move the row up
 				brickYLocation -= brickHeight;
 				brickXLocation = rectangle.xLocation;

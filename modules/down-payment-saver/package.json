@@ -13,9 +13,5 @@
 	"license": "MIT",
 	"bugs": {
 		"url": "https://github.com/schambersnh/down-payment-saver/issues"
-	},
-	"dependencies": {
-		"node-fetch": "^2.7.0",
-		"otplib": "^13.4.1"
 	}
 }
