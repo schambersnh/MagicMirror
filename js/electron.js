@@ -150,8 +150,17 @@ function createWindow () {
 	});
 
 	mainWindow.once("ready-to-show", () => {
+		console.log("[electron diagnostic] ready-to-show fired, calling show()");
 		mainWindow.show();
+		console.log(`[electron diagnostic] after show(): visible=${mainWindow.isVisible()} bounds=${JSON.stringify(mainWindow.getBounds())}`);
 	});
+
+	// TEMPORARY diagnostic - confirm whether ready-to-show ever fires at all. Revert after debugging.
+	setTimeout(() => {
+		if (mainWindow && !mainWindow.isVisible()) {
+			console.log("[electron diagnostic] 10s after createWindow: window still NOT visible, ready-to-show likely never fired");
+		}
+	}, 10000);
 }
 
 // Quit when all windows are closed.
