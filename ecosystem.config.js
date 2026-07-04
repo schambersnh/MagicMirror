@@ -6,7 +6,8 @@ module.exports = {
 			args: "start",
 			cwd: "/home/schambersnh/MagicMirror",
 			env: {
-				WAYLAND_DISPLAY: "wayland-0"
+				WAYLAND_DISPLAY: "wayland-0",
+				ELECTRON_ENABLE_GPU: "1"
 			}
 		}
 	]
