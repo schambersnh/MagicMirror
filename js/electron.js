@@ -11,6 +11,9 @@ const app = electron.app;
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow;
 
+// Avoid GPU/EGL context failures on hosts without a fully-initialized GPU session (e.g. Raspberry Pi under pm2)
+app.disableHardwareAcceleration();
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
