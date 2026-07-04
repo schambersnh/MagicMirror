@@ -9,7 +9,7 @@
  */
 
 var config = {
-	address: "localhost", 	// Address to listen on, can be:
+	address: "0.0.0.0", 	// Address to listen on, can be:
 							// - "localhost", "127.0.0.1", "::1" to listen on loopback interface
 							// - another specific IPv4/6 to listen on a specific interface
 							// - "0.0.0.0", "::" to listen on any interface
@@ -113,7 +113,7 @@ var config = {
 			classes: "default everyone",
 			disabled: false,
 			config: {
-				apikey: "e5945ea05dee3de9b99c69476f2653b1",
+				apikey: "911235ef4349d60e3b7092db05c101e5",
 				latitude: "41.558658",
 				longitude: "-72.650627",
 				iconset: "4c",
