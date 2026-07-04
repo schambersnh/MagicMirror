@@ -104,6 +104,24 @@ let config = {
 				broadcastNewsUpdates: true
 			}
 		},
+		{
+			module: "MMM-OpenWeatherMapForecast",
+			header: "Weather",
+			position: "bottom_left",
+			classes: "default everyone",
+			disabled: false,
+			config: {
+				apikey: "911235ef4349d60e3b7092db05c101e5",
+				latitude: "41.558658",
+				longitude: "-72.650627",
+				iconset: "4c",
+				units: "imperial",
+				showHourlyForecast: false,
+				maxDailiesToShow: 5,
+				concise: true,
+				forecastLayout: "table"
+			}
+		},
 	]
 };
 
