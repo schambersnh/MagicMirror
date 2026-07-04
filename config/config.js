@@ -9,7 +9,7 @@
  * see https://docs.magicmirror.builders/configuration/introduction.html#enviromnent-variables
  */
 let config = {
-	address: "localhost",	// Address to listen on, can be:
+	address: "127.0.0.1", 	// Address to listen on, can be:
 							// - "localhost", "127.0.0.1", "::1" to listen on loopback interface
 							// - another specific IPv4/6 to listen on a specific interface
 							// - "0.0.0.0", "::" to listen on any interface
@@ -34,8 +34,8 @@ let config = {
 			   // see https://en.wikipedia.org/wiki/Locale_(computer_software) for the possibilities
 
 	logLevel: ["INFO", "LOG", "WARN", "ERROR"], // Add "DEBUG" for even more logging
-	timeFormat: 24,
-	units: "metric",
+	timeFormat: 12,
+	units: "imperial",
 
 	modules: [
 		{
@@ -51,57 +51,15 @@ let config = {
 		},
 		{
 			module: "calendar",
-			header: "US Holidays",
+			header: "Upcoming Events",
 			position: "top_left",
 			config: {
 				calendars: [
 					{
-						fetchInterval: 7 * 24 * 60 * 60 * 1000,
 						symbol: "calendar-check",
-						url: "https://ics.calendarlabs.com/76/mm3137/US_Holidays.ics"
+						url: "https://calendar.google.com/calendar/ical/stephenchambers515%40gmail.com/private-7ad9805b526b801b71772e1282d5a7a5/basic.ics"
 					}
 				]
-			}
-		},
-		{
-			module: "compliments",
-			position: "lower_third"
-		},
-		{
-			module: "weather",
-			position: "top_right",
-			config: {
-				weatherProvider: "openmeteo",
-				type: "current",
-				lat: 40.776676,
-				lon: -73.971321
-			}
-		},
-		{
-			module: "weather",
-			position: "top_right",
-			header: "Weather Forecast",
-			config: {
-				weatherProvider: "openmeteo",
-				type: "forecast",
-				lat: 40.776676,
-				lon: -73.971321
-			}
-		},
-		{
-			module: "newsfeed",
-			position: "bottom_bar",
-			config: {
-				feeds: [
-					{
-						title: "New York Times",
-						url: "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"
-					}
-				],
-				showSourceTitle: true,
-				showPublishDate: true,
-				broadcastNewsFeeds: true,
-				broadcastNewsUpdates: true
 			}
 		},
 		{
@@ -153,44 +111,27 @@ let config = {
 			}
 		},
 		{
-			module: "MMM-Spotify",
-			position: "bottom_bar",
+			module: "newsfeed",
+			position: "top_center",
 			config: {
-				debug: false,
-				style: "default",
-				moduleWidth: 360,
-				control: "default",
-				showAccountButton: true,
-				showDeviceButton: true,
-				useExternalModal: false,
-				accountDefault: 0,
-				updateInterval: 1000,
-				idleInterval: 1000,
-				onStart: null,
-				deviceDisplay: "Listening on",
-				allowDevices: [],
-				notificationsOnSuspend: [
+				feeds: [
 					{
-						notification: "TOUCH_SET_MODE",
-						payload: "myNormalMode",
-					},
-					{
-						notification: "WHATEVERYOUWANT",
-						payload: "sendMe",
+						title: "New York Times",
+						url: "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"
 					}
 				],
-				notificationsOnResume: [
-					{
-						notification: "TOUCH_SET_MODE",
-						payload: "mySpotifyControlMode",
-					},
-				],
-				volumeSteps: 5,
-				miniBarConfig: {
-					album: false,
-					scroll: false,
-					logo: false,
-				}
+				showSourceTitle: true,
+				showPublishDate: true,
+				broadcastNewsFeeds: true,
+				broadcastNewsUpdates: true
+			}
+		},
+		{
+			module: "down-payment-saver",
+			position: "middle_center",
+			config: {
+				goal: 160000,
+				refreshTime: 300000
 			}
 		},
 	]
