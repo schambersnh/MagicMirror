@@ -192,7 +192,15 @@ let config = {
 				// ],
 			}
 		},
-	]
+	],
+	// TEMPORARY diagnostic override - testing if transparent+fullscreen compositing is broken on labwc. Revert after test.
+	electronOptions: {
+		fullscreen: false,
+		frame: true,
+		transparent: false,
+		width: 800,
+		height: 600
+	}
 };
 
 /*************** DO NOT EDIT THE LINE BELOW ***************/
