@@ -119,6 +119,17 @@ function createWindow () {
 		mainWindow.webContents.sendInputEvent({ type: "mouseMove", x: 0, y: 0 });
 	});
 
+	// TEMPORARY diagnostic - forward renderer console/JS errors to the main process log. Revert after debugging.
+	mainWindow.webContents.on("console-message", (event, level, message, line, sourceId) => {
+		console.log(`[renderer console] ${message} (${sourceId}:${line})`);
+	});
+	mainWindow.webContents.on("did-fail-load", (event, errorCode, errorDescription) => {
+		console.log(`[renderer did-fail-load] ${errorCode}: ${errorDescription}`);
+	});
+	mainWindow.webContents.on("render-process-gone", (event, details) => {
+		console.log(`[renderer process gone] ${JSON.stringify(details)}`);
+	});
+
 	// Set responders for window events.
 	mainWindow.on("closed", function () {
 		mainWindow = null;
