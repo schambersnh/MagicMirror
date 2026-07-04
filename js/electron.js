@@ -11,8 +11,15 @@ const app = electron.app;
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow;
 
-// Avoid GPU/EGL context failures on hosts without a fully-initialized GPU session (e.g. Raspberry Pi under pm2)
-app.disableHardwareAcceleration();
+// Force software rendering (SwiftShader) instead of real OpenGL/EGL, which fails to
+// initialize on this host (e.g. Raspberry Pi under pm2). Note: app.disableHardwareAcceleration()
+// also kills the GPU process outright, which on Linux tends to produce a blank/black window
+// instead of a working software-rendered one — these switches keep the GPU process alive but
+// steer it away from the broken ANGLE/EGL backend.
+app.commandLine.appendSwitch("use-gl", "swiftshader");
+app.commandLine.appendSwitch("use-angle", "swiftshader");
+app.commandLine.appendSwitch("enable-unsafe-swiftshader");
+app.commandLine.appendSwitch("disable-gpu-sandbox");
 
 app.on("child-process-gone", (event, details) => {
 	Log.error(`child-process-gone: ${JSON.stringify(details)}`);
