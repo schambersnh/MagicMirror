@@ -1,41 +1,41 @@
-/* Magic Mirror Config Sample
- *
- * By Michael Teeuw https://michaelteeuw.nl
- * MIT Licensed.
+/* Config Sample
  *
  * For more information on how you can configure this file
- * See https://github.com/MichMich/MagicMirror#configuration
+ * see https://docs.magicmirror.builders/configuration/introduction.html
+ * and https://docs.magicmirror.builders/modules/configuration.html
  *
+ * You can use environment variables using a `config.js.template` file instead of `config.js`
+ * which will be converted to `config.js` while starting. For more information
+ * see https://docs.magicmirror.builders/configuration/introduction.html#enviromnent-variables
  */
-
-var config = {
+let config = {
 	address: "127.0.0.1", 	// Address to listen on, can be:
 							// - "localhost", "127.0.0.1", "::1" to listen on loopback interface
 							// - another specific IPv4/6 to listen on a specific interface
 							// - "0.0.0.0", "::" to listen on any interface
 							// Default, when address config is left out or empty, is "localhost"
 	port: 8080,
-	basePath: "/", 	// The URL path where MagicMirror is hosted. If you are using a Reverse proxy
-					// you must set the sub path here. basePath must end with a /
-	ipWhitelist: ["127.0.0.1", "::ffff:127.0.0.1", "::1"], 	// Set [] to allow all IP addresses
-															// or add a specific IPv4 of 192.168.1.5 :
-															// ["127.0.0.1", "::ffff:127.0.0.1", "::1", "::ffff:192.168.1.5"],
-															// or IPv4 range of 192.168.3.0 --> 192.168.3.15 use CIDR format :
-															// ["127.0.0.1", "::ffff:127.0.0.1", "::1", "::ffff:192.168.3.0/28"],
+	basePath: "/",	// The URL path where MagicMirror² is hosted. If you are using a Reverse proxy
+									// you must set the sub path here. basePath must end with a /
+	ipWhitelist: ["127.0.0.1", "::ffff:127.0.0.1", "::1"],	// Set [] to allow all IP addresses
+									// or add a specific IPv4 of 192.168.1.5 :
+									// ["127.0.0.1", "::ffff:127.0.0.1", "::1", "::ffff:192.168.1.5"],
+									// or IPv4 range of 192.168.3.0 --> 192.168.3.15 use CIDR format :
+									// ["127.0.0.1", "::ffff:127.0.0.1", "::1", "::ffff:192.168.3.0/28"],
 
-	useHttps: false, 		// Support HTTPS or not, default "false" will use HTTP
-	httpsPrivateKey: "", 	// HTTPS private key path, only require when useHttps is true
-	httpsCertificate: "", 	// HTTPS Certificate path, only require when useHttps is true
+	useHttps: false,			// Support HTTPS or not, default "false" will use HTTP
+	httpsPrivateKey: "",	// HTTPS private key path, only require when useHttps is true
+	httpsCertificate: "",	// HTTPS Certificate path, only require when useHttps is true
 
 	language: "en",
+	locale: "en-US",   // this variable is provided as a consistent location
+			   // it is currently only used by 3rd party modules. no MagicMirror code uses this value
+			   // as we have no usage, we  have no constraints on what this field holds
+			   // see https://en.wikipedia.org/wiki/Locale_(computer_software) for the possibilities
+
 	logLevel: ["INFO", "LOG", "WARN", "ERROR"], // Add "DEBUG" for even more logging
 	timeFormat: 12,
 	units: "imperial",
-	// serverOnly:  true/false/"local" ,
-	// local for armv6l processors, default
-	//   starts serveronly and then starts chrome browser
-	// false, default for all NON-armv6l devices
-	// true, force serveronly mode, because you want to.. no UI on this device
 
 	modules: [
 		{
@@ -92,7 +92,6 @@ var config = {
 				}
 			}
 		},
-
 		{
 			module: "calendar",
 			header: "Upcoming Events",
@@ -170,17 +169,6 @@ var config = {
 				broadcastNewsUpdates: true
 			}
 		},
-		// {
-		// 	module: "MMM-cryptocurrency",
-		// 	position: "top_right",
-		// 	config: {
-		// 		apikey: 'c2d40c3f-451e-4db6-ab17-a80535517873',
-		// 		currency: ['bitcoin'],
-		// 		headers: ['change24h', 'change1h', 'change7d'],
-		// 		displayType: 'logoWithChanges',
-		// 		showGraphs: true
-		// 	}
-		// },
 		{
 			module: "down-payment-saver",
 			position: "middle_center",
@@ -204,47 +192,8 @@ var config = {
 				// ],
 			}
 		},
-		{
-			module: "MMM-YNAB",
-			position: "top_bar",
-			config: {
-				token: "5dab62123c916fc9c36890a0532fdc1165b01aaceac27e084cff91f054a96650",
-				categories: [ "Groceries", "Dining Out", "Random Stuff", "Travel" ]
-			}
-		},
-		{
-			module: 'MMM-MyCommute',
-			position: 'top_right',
-			config: {
-				apiKey: 'AIzaSyBIoMUAdJ5IakgN7h4fZNQoiLmUUC5Asr4',
-				origin: '138 College St, Middletown CT',
-				startTime: '00:00',
-				endTime: '23:59',
-				hideDays: [0,6],
-				destinations: [
-					{
-						destination: '15 Scotland Rd, Newbury MA 01951',
-						label: 'Sean and Katie',
-						mode: 'driving',
-					},
-					{
-						destination: '1482 E 2nd St, Brooklyn NY 11230',
-						label: `Tiff's Family`,
-						mode: 'driving',
-					},
-					{
-						destination: '112 Broadway St, Dover NH 03820',
-						label: 'Hannah and Brian',
-						mode: 'driving',
-					}
-
-				]
-			}
-		},
-
-
 	]
 };
 
 /*************** DO NOT EDIT THE LINE BELOW ***************/
-if (typeof module !== "undefined") {module.exports = config;}
+if (typeof module !== "undefined") { module.exports = config; }

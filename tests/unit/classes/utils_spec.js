@@ -1,38 +1,83 @@
-const Utils = require("../../../js/utils.js");
-const colors = require("colors/safe");
+const fs = require("node:fs");
 
-describe("Utils", function () {
-	describe("colors", function () {
-		const colorsEnabled = colors.enabled;
+const Log = require("../../../js/logger");
+const { checkConfigFile, ConfigError } = require("../../../js/utils");
 
-		afterEach(function () {
-			colors.enabled = colorsEnabled;
+const createConfigObject = (modules) => ({
+	configFilename: "config.js",
+	configContentFull: "module.exports = { modules: [] };",
+	fullConf: { modules }
+});
+
+const runCheck = (modules) => {
+	checkConfigFile(createConfigObject(modules));
+};
+
+const expectExitForModules = (modules) => {
+	vi.spyOn(process, "exit").mockImplementation(() => {
+		throw new ConfigError("");
+	});
+
+	expect(() => {
+		runCheck(modules);
+	}).toThrow(ConfigError);
+};
+
+describe("utils", () => {
+	let originalReadFileSync;
+
+	beforeEach(() => {
+		originalReadFileSync = fs.readFileSync;
+
+		vi.spyOn(fs, "readFileSync").mockImplementation((fileName, ...args) => {
+			if (fileName === "index.html") {
+				return "<div class=\"region top_bar\"></div>\n<div class=\"region lower_third\"></div>";
+			}
+
+			return originalReadFileSync.call(fs, fileName, ...args);
 		});
 
-		it("should have info, warn and error properties", function () {
-			expect(Utils.colors).toHaveProperty("info");
-			expect(Utils.colors).toHaveProperty("warn");
-			expect(Utils.colors).toHaveProperty("error");
+		vi.spyOn(fs, "writeFileSync").mockImplementation(() => {});
+		vi.spyOn(Log, "info").mockImplementation(() => {});
+		vi.spyOn(Log, "warn").mockImplementation(() => {});
+		vi.spyOn(Log, "error").mockImplementation(() => {});
+	});
+
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	it("accepts valid module entries", () => {
+		expect(() => {
+			runCheck([
+				{ module: "clock", position: "top_bar" },
+				{ module: "newsfeed" }
+			]);
+		}).not.toThrow();
+		expect(Log.error).not.toHaveBeenCalled();
+	});
+
+	it("exits when modules is not an array", () => {
+		expectExitForModules("not-an-array");
+		expect(Log.error).toHaveBeenCalledWith("This module configuration contains errors:\nmodules must be an array");
+	});
+
+	it("exits when module field is missing or not a string", () => {
+		expectExitForModules([{ module: 123, position: "top_bar" }]);
+		expect(Log.error).toHaveBeenCalled();
+		expect(Log.error.mock.calls[0][0]).toContain("module: must be a string");
+	});
+
+	it("warns for unknown positions without exiting", () => {
+		const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => {
+			throw new ConfigError("");
 		});
 
-		it("properties should be functions", function () {
-			expect(typeof Utils.colors.info).toBe("function");
-			expect(typeof Utils.colors.warn).toBe("function");
-			expect(typeof Utils.colors.error).toBe("function");
-		});
-
-		it("should print colored message in supported consoles", function () {
-			colors.enabled = true;
-			expect(Utils.colors.info("some informations")).toBe("\u001b[34msome informations\u001b[39m");
-			expect(Utils.colors.warn("a warning")).toBe("\u001b[33ma warning\u001b[39m");
-			expect(Utils.colors.error("ERROR!")).toBe("\u001b[31mERROR!\u001b[39m");
-		});
-
-		it("should print message in unsupported consoles", function () {
-			colors.enabled = false;
-			expect(Utils.colors.info("some informations")).toBe("some informations");
-			expect(Utils.colors.warn("a warning")).toBe("a warning");
-			expect(Utils.colors.error("ERROR!")).toBe("ERROR!");
-		});
+		expect(() => {
+			runCheck([{ module: "clock", position: "made_up_region" }]);
+		}).not.toThrow();
+		expect(exitSpy).not.toHaveBeenCalled();
+		expect(Log.warn).toHaveBeenCalled();
+		expect(Log.warn.mock.calls[0][0]).toContain("uses unknown position");
 	});
 });

@@ -1,12 +1,6 @@
 /* global io */
 
-/* Magic Mirror
- * TODO add description
- *
- * By Michael Teeuw https://michaelteeuw.nl
- * MIT Licensed.
- */
-const MMSocket = function (moduleName) {
+export const MMSocket = function (moduleName) {
 	if (typeof moduleName !== "string") {
 		throw new Error("Please set the module name for the MMSocket.");
 	}
@@ -18,8 +12,10 @@ const MMSocket = function (moduleName) {
 	if (typeof config !== "undefined" && typeof config.basePath !== "undefined") {
 		base = config.basePath;
 	}
-	this.socket = io("/" + this.moduleName, {
-		path: base + "socket.io"
+	this.socket = io(`/${this.moduleName}`, {
+		path: `${base}socket.io`,
+		pingInterval: 120000, // send pings every 2 mins
+		pingTimeout: 120000 // wait up to 2 mins for a pong
 	});
 
 	let notificationCallback = function () {};
@@ -44,10 +40,10 @@ const MMSocket = function (moduleName) {
 		notificationCallback = callback;
 	};
 
-	this.sendNotification = (notification, payload) => {
-		if (typeof payload === "undefined") {
-			payload = {};
-		}
+	this.sendNotification = (notification, payload = {}) => {
 		this.socket.emit(notification, payload);
 	};
 };
+
+// Legacy global bridge for third-party modules that reference MMSocket directly.
+if (!globalThis.MMSocket) globalThis.MMSocket = MMSocket;

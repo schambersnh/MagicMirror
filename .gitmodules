@@ -1,0 +1,9 @@
+[submodule "modules/MMM-Spotify"]
+	path = modules/MMM-Spotify
+	url = https://github.com/skuethe/MMM-Spotify.git
+[submodule "modules/MMM-OpenWeatherMapForecast"]
+	path = modules/MMM-OpenWeatherMapForecast
+	url = https://github.com/MarcLandis/MMM-OpenWeatherMapForecast
+[submodule "modules/MMM-MyScoreboard"]
+	path = modules/MMM-MyScoreboard
+	url = https://github.com/dathbe/MMM-MyScoreboard

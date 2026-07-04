@@ -3,18 +3,18 @@
   --color-text-dimmed: #666;
   --color-text-bright: #fff;
   --color-background: #000;
-
   --font-primary: "Roboto Condensed";
   --font-secondary: "Roboto";
-
   --font-size: 20px;
-  --font-size-small: 0.75rem;
-
+  --font-size-xsmall: 0.75rem;
+  --font-size-small: 1rem;
+  --font-size-medium: 1.5rem;
+  --font-size-large: 3.25rem;
+  --font-size-xlarge: 3.75rem;
   --gap-body-top: 60px;
   --gap-body-right: 60px;
   --gap-body-bottom: 60px;
   --gap-body-left: 60px;
-
   --gap-modules: 30px;
 }
 
@@ -60,27 +60,27 @@ body {
 }
 
 .xsmall {
-  font-size: var(--font-size-small);
+  font-size: var(--font-size-xsmall);
   line-height: 1.275;
 }
 
 .small {
-  font-size: 1rem;
+  font-size: var(--font-size-small);
   line-height: 1.25;
 }
 
 .medium {
-  font-size: 1.5rem;
+  font-size: var(--font-size-medium);
   line-height: 1.225;
 }
 
 .large {
-  font-size: 3.25rem;
+  font-size: var(--font-size-large);
   line-height: 1;
 }
 
 .xlarge {
-  font-size: 3.75rem;
+  font-size: var(--font-size-xlarge);
   line-height: 1;
   letter-spacing: -3px;
 }
@@ -115,7 +115,7 @@ body {
 
 header {
   text-transform: uppercase;
-  font-size: var(--font-size-small);
+  font-size: var(--font-size-xsmall);
   font-family: var(--font-primary), Arial, Helvetica, sans-serif;
   font-weight: 400;
   border-bottom: 1px solid var(--color-text-dimmed);
@@ -136,6 +136,14 @@ sup {
 
 .module {
   margin-bottom: var(--gap-modules);
+}
+
+.module.hidden {
+  pointer-events: none;
+}
+
+.module:not(.hidden) {
+  pointer-events: auto;
 }
 
 .region.bottom .module {
@@ -163,15 +171,8 @@ sup {
 
 .region.fullscreen {
   position: absolute;
-  top: calc(-1 * var(--gap-body-top));
-  left: calc(-1 * var(--gap-body-left));
-  right: calc(-1 * var(--gap-body-right));
-  bottom: calc(-1 * var(--gap-body-bottom));
+  inset: calc(-1 * var(--gap-body-top)) calc(-1 * var(--gap-body-right)) calc(-1 * var(--gap-body-bottom)) calc(-1 * var(--gap-body-left));
   pointer-events: none;
-}
-
-.region.fullscreen * {
-  pointer-events: auto;
 }
 
 .region.right {
@@ -237,4 +238,29 @@ sup {
   width: 100%;
   border-spacing: 0;
   border-collapse: separate;
+}
+
+/**
+ * Container Definitions.
+ */
+
+.region .container {
+  display: flex;
+  flex-direction: column;
+}
+
+.region .container.hidden {
+  display: none;
+}
+
+.region.left .flex {
+  justify-content: flex-start;
+}
+
+.region.center .flex {
+  justify-content: center;
+}
+
+.region.right .flex {
+  justify-content: flex-end;
 }

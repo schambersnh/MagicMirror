@@ -1,11 +1,5 @@
 /* global mmPort */
 
-/* Magic Mirror
- * Config Defaults
- *
- * By Michael Teeuw https://michaelteeuw.nl
- * MIT Licensed.
- */
 const address = "localhost";
 let port = 8080;
 if (typeof mmPort !== "undefined") {
@@ -15,16 +9,36 @@ const defaults = {
 	address: address,
 	port: port,
 	basePath: "/",
-	kioskmode: false,
+	useHttps: false, // Support HTTPS or not, default "false" will use HTTP
+	httpsPrivateKey: "", // HTTPS private key path, only required when useHttps is true
+	httpsCertificate: "", // HTTPS Certificate path, only required when useHttps is true
+	tls: null, // Legacy compatibility option for Electron URL selection (prefer useHttps)
 	electronOptions: {},
+	electronSwitches: [],
+	ignoreXOriginHeader: false, // Remove X-Frame-Options response header in Electron
+	ignoreContentSecurityPolicy: false, // Remove Content-Security-Policy response header in Electron
 	ipWhitelist: ["127.0.0.1", "::ffff:127.0.0.1", "::1"],
+	cors: "disabled", // or "allowAll" or "allowWhitelist"
+	corsDomainWhitelist: [], // example: ["api.mapbox.com"]
+	watchTargets: [],
 
 	language: "en",
 	logLevel: ["INFO", "LOG", "WARN", "ERROR"],
 	timeFormat: 24,
 	units: "metric",
 	zoom: 1,
-	customCss: "css/custom.css",
+	customCss: "config/custom.css",
+	foreignModulesDir: "modules",
+	defaultModulesDir: "defaultmodules",
+	hideConfigSecrets: false,
+	// httpHeaders used by helmet, see https://helmetjs.github.io/. You can add other/more object values by overriding this in config.js,
+	// e.g. you need to add `frameguard: false` for embedding MagicMirror in another website, see https://github.com/MagicMirrorOrg/MagicMirror/issues/2847
+	httpHeaders: { contentSecurityPolicy: false, crossOriginOpenerPolicy: false, crossOriginEmbedderPolicy: false, crossOriginResourcePolicy: false, originAgentCluster: false },
+
+	// properties for checking if server is alive and has same startup-timestamp, the check is per default enabled
+	// (interval 30 seconds). If startup-timestamp has changed the client reloads the magicmirror webpage.
+	checkServerInterval: 30 * 1000,
+	reloadAfterServerRestart: false,
 
 	modules: [
 		{
@@ -36,7 +50,7 @@ const defaults = {
 			position: "upper_third",
 			classes: "large thin",
 			config: {
-				text: "Magic Mirror<sup>2</sup>"
+				text: "MagicMirror²"
 			}
 		},
 		{
@@ -59,7 +73,7 @@ const defaults = {
 			position: "middle_center",
 			classes: "xsmall",
 			config: {
-				text: "If you get this message while your config file is already created,<br>" + "it probably contains an error. To validate your config file run in your MagicMirror directory<br>" + "<pre>npm run config:check</pre>"
+				text: "If you get this message while your config file is already created,<br>" + "it probably contains an error. To validate your config file run in your MagicMirror² directory<br>" + "<pre>node --run config:check</pre>"
 			}
 		},
 		{
@@ -67,15 +81,10 @@ const defaults = {
 			position: "bottom_bar",
 			classes: "xsmall dimmed",
 			config: {
-				text: "www.michaelteeuw.nl"
+				text: "https://magicmirror.builders/"
 			}
 		}
-	],
-
-	paths: {
-		modules: "modules",
-		vendor: "vendor"
-	}
+	]
 };
 
 /*************** DO NOT EDIT THE LINE BELOW ***************/

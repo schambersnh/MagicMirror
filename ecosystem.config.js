@@ -2,11 +2,11 @@ module.exports = {
 	apps: [
 		{
 			name: "mm",
-			script: "node_modules/.bin/electron",
-			args: "js/electron.js",
+			script: "npm",
+			args: "start",
 			cwd: "/home/schambersnh/MagicMirror",
 			env: {
-				DISPLAY: ":0"
+				WAYLAND_DISPLAY: "wayland-0"
 			}
 		}
 	]

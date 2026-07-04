@@ -1,18 +1,37 @@
-const fs = require("fs");
-const path = require("path");
-const translations = require("../../translations/translations.js");
+const fs = require("node:fs");
+const path = require("node:path");
+const { pathToFileURL } = require("node:url");
 const helmet = require("helmet");
 const { JSDOM } = require("jsdom");
 const express = require("express");
-const sinon = require("sinon");
+const translations = require("../../translations/translations");
 
-describe("Translations", function () {
+/**
+ * Helper function to create a fresh Translator instance with DOM environment.
+ * @returns {object} Object containing window and Translator
+ */
+function createTranslationTestEnvironment () {
+	// Setup DOM environment with Translator
+	const translatorJs = fs.readFileSync(path.join(__dirname, "..", "..", "js", "translator.js"), "utf-8");
+	const dom = new JSDOM("", { url: "http://localhost:3000", runScripts: "outside-only" });
+
+	dom.window.Log = { log: vi.fn(), error: vi.fn() };
+	dom.window.translations = translations;
+	dom.window.fetch = fetch;
+	dom.window.eval(translatorJs);
+
+	const window = dom.window;
+
+	return { window, Translator: window.Translator };
+}
+
+describe("translations", () => {
 	let server;
 
-	beforeAll(function () {
+	beforeAll(() => {
 		const app = express();
 		app.use(helmet());
-		app.use(function (req, res, next) {
+		app.use((req, res, next) => {
 			res.header("Access-Control-Allow-Origin", "*");
 			next();
 		});
@@ -21,13 +40,14 @@ describe("Translations", function () {
 		server = app.listen(3000);
 	});
 
-	afterAll(function () {
-		server.close();
+	afterAll(async () => {
+		await server.close();
 	});
 
-	it("should have a translation file in the specified path", function () {
-		for (let language in translations) {
+	it("should have a translation file in the specified path", () => {
+		for (const language in translations) {
 			const file = fs.statSync(translations[language]);
+
 			expect(file.isFile()).toBe(true);
 		}
 	});
@@ -35,191 +55,186 @@ describe("Translations", function () {
 	describe("loadTranslations", () => {
 		let dom;
 
-		beforeEach(() => {
-			dom = new JSDOM(
-				`<script>var Translator = {}; var Log = {log: function(){}}; var config = {language: 'de'};</script>\
-					<script src="file://${path.join(__dirname, "..", "..", "js", "class.js")}"></script>\
-					<script src="file://${path.join(__dirname, "..", "..", "js", "module.js")}"></script>`,
-				{ runScripts: "dangerously", resources: "usable" }
-			);
+		beforeEach(async () => {
+			// Create a new translation test environment for each test
+			const env = createTranslationTestEnvironment();
+			const window = env.window;
+
+			// Bridge JSDOM globals to Node.js so module.js (ES module) can access them
+			global.Log = window.Log;
+			global.Translator = window.Translator;
+			global.config = { language: "de" };
+			global.window = { name: "", mmVersion: "2.0.0" };
+			global.MM = { hideModule: () => {}, showModule: () => {}, sendNotification: () => {}, updateDom: () => {} };
+			global.nunjucks = {
+				Environment () {
+					this.addFilter = () => {};
+					this.renderString = () => "";
+					this.render = (_t, _d, cb) => cb(null, "");
+				},
+				WebLoader () {},
+				runtime: { markSafe: (str) => str }
+			};
+
+			// Import Module directly — eval can't handle ES module syntax
+			const modulePath = pathToFileURL(path.join(__dirname, "..", "..", "js", "module.js")).href;
+			const { Module } = await import(`${modulePath}?test=${Date.now()}`);
+			window.Module = Module;
+
+			// Expose config on window so tests can modify dom.window.config
+			window.config = global.config;
+
+			dom = { window };
 		});
 
-		it("should load translation file", (done) => {
-			dom.window.onload = async function () {
-				const { Translator, Module, config } = dom.window;
-				config.language = "en";
-				Translator.load = sinon.stub().callsFake((_m, _f, _fb, callback) => callback());
-
-				Module.register("name", { getTranslations: () => translations });
-				const MMM = Module.create("name");
-
-				const loaded = sinon.stub();
-				MMM.loadTranslations(loaded);
-
-				expect(loaded.callCount).toBe(1);
-				expect(Translator.load.args.length).toBe(1);
-				expect(Translator.load.calledWith(MMM, "translations/en.json", false, sinon.match.func)).toBe(true);
-
-				done();
-			};
+		afterEach(() => {
+			delete global.Log;
+			delete global.Translator;
+			delete global.config;
+			delete global.window;
+			delete global.MM;
+			delete global.nunjucks;
 		});
 
-		it("should load translation + fallback file", (done) => {
-			dom.window.onload = async function () {
-				const { Translator, Module } = dom.window;
-				Translator.load = sinon.stub().callsFake((_m, _f, _fb, callback) => callback());
+		it("should load translation file", async () => {
+			const { Translator, Module, config } = dom.window;
+			config.language = "en";
+			Translator.load = vi.fn().mockImplementation(() => null);
 
-				Module.register("name", { getTranslations: () => translations });
-				const MMM = Module.create("name");
+			Module.register("name", { getTranslations: () => translations });
+			const MMM = Module.create("name");
 
-				const loaded = sinon.stub();
-				MMM.loadTranslations(loaded);
+			await MMM.loadTranslations();
 
-				expect(loaded.callCount).toBe(1);
-				expect(Translator.load.args.length).toBe(2);
-				expect(Translator.load.calledWith(MMM, "translations/de.json", false, sinon.match.func)).toBe(true);
-				expect(Translator.load.calledWith(MMM, "translations/en.json", true, sinon.match.func)).toBe(true);
-
-				done();
-			};
+			expect(Translator.load.mock.calls).toHaveLength(1);
+			expect(Translator.load).toHaveBeenCalledWith(MMM, "translations/en.json", false);
 		});
 
-		it("should load translation fallback file", (done) => {
-			dom.window.onload = async function () {
-				const { Translator, Module, config } = dom.window;
-				config.language = "--";
-				Translator.load = sinon.stub().callsFake((_m, _f, _fb, callback) => callback());
+		it("should load translation + fallback file", async () => {
+			const { Translator, Module } = dom.window;
+			Translator.load = vi.fn().mockImplementation(() => null);
 
-				Module.register("name", { getTranslations: () => translations });
-				const MMM = Module.create("name");
+			Module.register("name", { getTranslations: () => translations });
+			const MMM = Module.create("name");
 
-				const loaded = sinon.stub();
-				MMM.loadTranslations(loaded);
+			await MMM.loadTranslations();
 
-				expect(loaded.callCount).toBe(1);
-				expect(Translator.load.args.length).toBe(1);
-				expect(Translator.load.calledWith(MMM, "translations/en.json", true, sinon.match.func)).toBe(true);
-
-				done();
-			};
+			expect(Translator.load.mock.calls).toHaveLength(2);
+			expect(Translator.load).toHaveBeenCalledWith(MMM, "translations/de.json", false);
+			expect(Translator.load).toHaveBeenCalledWith(MMM, "translations/en.json", true);
 		});
 
-		it("should load no file", (done) => {
-			dom.window.onload = async function () {
-				const { Translator, Module } = dom.window;
-				Translator.load = sinon.stub();
+		it("should load translation fallback file", async () => {
+			const { Translator, Module, config } = dom.window;
+			config.language = "--";
+			Translator.load = vi.fn().mockImplementation(() => null);
 
-				Module.register("name", {});
-				const MMM = Module.create("name");
+			Module.register("name", { getTranslations: () => translations });
+			const MMM = Module.create("name");
 
-				const loaded = sinon.stub();
-				MMM.loadTranslations(loaded);
+			await MMM.loadTranslations();
 
-				expect(loaded.callCount).toBe(1);
-				expect(Translator.load.callCount).toBe(0);
+			expect(Translator.load.mock.calls).toHaveLength(1);
+			expect(Translator.load).toHaveBeenCalledWith(MMM, "translations/en.json", true);
+		});
 
-				done();
-			};
+		it("should load no file", async () => {
+			const { Translator, Module } = dom.window;
+			Translator.load = vi.fn();
+
+			Module.register("name", {});
+			const MMM = Module.create("name");
+
+			await MMM.loadTranslations();
+
+			expect(Translator.load.mock.calls).toHaveLength(0);
 		});
 	});
 
 	const mmm = {
 		name: "TranslationTest",
-		file(file) {
+		file (file) {
 			return `http://localhost:3000/${file}`;
 		}
 	};
 
-	describe("Parsing language files through the Translator class", function () {
-		for (let language in translations) {
-			it(`should parse ${language}`, function (done) {
-				const dom = new JSDOM(
-					`<script>var translations = ${JSON.stringify(translations)}; var Log = {log: function(){}};</script>\
-					<script src="file://${path.join(__dirname, "..", "..", "js", "translator.js")}">`,
-					{ runScripts: "dangerously", resources: "usable" }
-				);
-				dom.window.onload = function () {
-					const { Translator } = dom.window;
+	describe("parsing language files through the Translator class", () => {
+		for (const language in translations) {
+			it(`should parse ${language}`, async () => {
+				const { Translator } = createTranslationTestEnvironment();
+				await Translator.load(mmm, translations[language], false);
 
-					Translator.load(mmm, translations[language], false, function () {
-						expect(typeof Translator.translations[mmm.name]).toBe("object");
-						expect(Object.keys(Translator.translations[mmm.name]).length).toBeGreaterThanOrEqual(1);
-						done();
-					});
-				};
+				expect(typeof Translator.translations[mmm.name]).toBe("object");
+				expect(Object.keys(Translator.translations[mmm.name]).length).toBeGreaterThanOrEqual(1);
 			});
 		}
 	});
 
-	describe("Same keys", function () {
+	describe("same keys", () => {
 		let base;
-		let missing = [];
 
-		beforeAll(function (done) {
-			const dom = new JSDOM(
-				`<script>var translations = ${JSON.stringify(translations)}; var Log = {log: function(){}};</script>\
-					<script src="file://${path.join(__dirname, "..", "..", "js", "translator.js")}">`,
-				{ runScripts: "dangerously", resources: "usable" }
-			);
-			dom.window.onload = function () {
-				const { Translator } = dom.window;
+		// Some expressions are not easy to translate automatically. For the sake of a working test, we filter them out.
+		const COMMON_EXCEPTIONS = ["WEEK_SHORT"];
 
-				Translator.load(mmm, translations.en, false, function () {
-					base = Object.keys(Translator.translations[mmm.name]).sort();
-					done();
-				});
-			};
+		// Some languages don't have certain words, so we need to filter those language specific exceptions.
+		const LANGUAGE_EXCEPTIONS = {
+			ca: ["DAYBEFOREYESTERDAY"],
+			cv: ["DAYBEFOREYESTERDAY"],
+			cy: ["DAYBEFOREYESTERDAY"],
+			en: ["DAYAFTERTOMORROW", "DAYBEFOREYESTERDAY"],
+			fy: ["DAYBEFOREYESTERDAY"],
+			gl: ["DAYBEFOREYESTERDAY"],
+			hu: ["DAYBEFOREYESTERDAY"],
+			id: ["DAYBEFOREYESTERDAY"],
+			it: ["DAYBEFOREYESTERDAY"],
+			"pt-br": ["DAYAFTERTOMORROW"],
+			tr: ["DAYBEFOREYESTERDAY"]
+		};
+
+		// Function to initialize JSDOM and load translations
+		const initializeTranslationDOM = async (language) => {
+			const { Translator } = createTranslationTestEnvironment();
+			await Translator.load(mmm, translations[language], false);
+			return Translator.translations[mmm.name];
+		};
+
+		beforeAll(async () => {
+			// Using German as the base rather than English, since
+			// some words do not have a direct translation in English.
+			const germanTranslations = await initializeTranslationDOM("de");
+			base = Object.keys(germanTranslations).sort();
 		});
 
-		afterAll(function () {
-			console.log(missing);
-		});
+		for (const language in translations) {
+			if (language === "de") continue;
 
-		for (let language in translations) {
-			if (language === "en") {
-				continue;
-			}
-
-			describe(`Translation keys of ${language}`, function () {
+			describe(`Translation keys of ${language}`, () => {
 				let keys;
 
-				beforeAll(function (done) {
-					const dom = new JSDOM(
-						`<script>var translations = ${JSON.stringify(translations)}; var Log = {log: function(){}};</script>\
-					<script src="file://${path.join(__dirname, "..", "..", "js", "translator.js")}">`,
-						{ runScripts: "dangerously", resources: "usable" }
-					);
-					dom.window.onload = function () {
-						const { Translator } = dom.window;
-
-						Translator.load(mmm, translations[language], false, function () {
-							keys = Object.keys(Translator.translations[mmm.name]).sort();
-							done();
-						});
-					};
+				beforeAll(async () => {
+					const languageTranslations = await initializeTranslationDOM(language);
+					keys = Object.keys(languageTranslations).sort();
 				});
 
-				it(`${language} keys should be in base`, function () {
-					keys.forEach(function (key) {
-						expect(base.indexOf(key)).toBeGreaterThanOrEqual(0);
+				it(`${language} should not contain keys that are not in base language`, () => {
+					keys.forEach((key) => {
+						expect(base).toContain(key, `Translation key '${key}' in language '${language}' is not present in base language`);
 					});
 				});
 
-				it(`${language} should contain all base keys`, function () {
-					// TODO: when all translations are fixed, use
-					// expect(keys).toEqual(base);
-					// instead of the try-catch-block
+				it(`${language} should contain all base keys (excluding defined exceptions)`, () => {
+					let filteredBase = base.filter((key) => !COMMON_EXCEPTIONS.includes(key));
+					let filteredKeys = keys.filter((key) => !COMMON_EXCEPTIONS.includes(key));
 
-					try {
-						expect(keys).toEqual(base);
-					} catch (e) {
-						if (e.message.match(/expect.*toEqual/)) {
-							const diff = base.filter((key) => !keys.includes(key));
-							missing.push(`Missing Translations for language ${language}: ${diff}`);
-						} else {
-							throw e;
-						}
+					if (LANGUAGE_EXCEPTIONS[language]) {
+						const exceptions = LANGUAGE_EXCEPTIONS[language];
+						filteredBase = filteredBase.filter((key) => !exceptions.includes(key));
+						filteredKeys = filteredKeys.filter((key) => !exceptions.includes(key));
 					}
+
+					filteredBase.forEach((baseKey) => {
+						expect(filteredKeys).toContain(baseKey, `Translation key '${baseKey}' is missing in language '${language}'`);
+					});
 				});
 			});
 		}
