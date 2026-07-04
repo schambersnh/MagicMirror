@@ -122,6 +122,77 @@ let config = {
 				forecastLayout: "table"
 			}
 		},
+		{
+			module: "MMM-MyScoreboard",
+			position: "bottom_right",
+			classes: "default everyone",
+			header: "My Scoreboard",
+			config: {
+				showLeagueSeparators: true,
+				colored: true,
+				viewStyle: "mediumLogos",
+				sports: [
+					{
+						league: "NHL",
+						teams: ["BOS"]
+					},
+					{
+						league: "NBA",
+						teams: ["BOS"]
+					},
+					{
+						league: "NFL",
+						teams: ["NE"]
+					},
+					{
+						league: "MLB",
+						teams: ["BOS"]
+					},
+				]
+
+			}
+		},
+		{
+			module: "MMM-Spotify",
+			position: "bottom_bar",
+			config: {
+				debug: false,
+				style: "default",
+				moduleWidth: 360,
+				control: "default",
+				showAccountButton: true,
+				showDeviceButton: true,
+				useExternalModal: false,
+				accountDefault: 0,
+				updateInterval: 1000,
+				idleInterval: 1000,
+				onStart: null,
+				deviceDisplay: "Listening on",
+				allowDevices: [],
+				notificationsOnSuspend: [
+					{
+						notification: "TOUCH_SET_MODE",
+						payload: "myNormalMode",
+					},
+					{
+						notification: "WHATEVERYOUWANT",
+						payload: "sendMe",
+					}
+				],
+				notificationsOnResume: [
+					{
+						notification: "TOUCH_SET_MODE",
+						payload: "mySpotifyControlMode",
+					},
+				],
+				volumeSteps: 5,
+				miniBarConfig: {
+					album: false,
+					scroll: false,
+					logo: false,
+				}
+			}
+		},
 	]
 };
 
