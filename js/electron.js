@@ -14,6 +14,10 @@ const BrowserWindow = electron.BrowserWindow;
 // Avoid GPU/EGL context failures on hosts without a fully-initialized GPU session (e.g. Raspberry Pi under pm2)
 app.disableHardwareAcceleration();
 
+app.on("child-process-gone", (event, details) => {
+	Log.error(`child-process-gone: ${JSON.stringify(details)}`);
+});
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
@@ -63,6 +67,22 @@ function createWindow() {
 
 	let address = (config.address === void 0) | (config.address === "") ? (config.address = "localhost") : config.address;
 	mainWindow.loadURL(`${prefix}${address}:${config.port}`);
+
+	mainWindow.webContents.on("did-fail-load", (event, errorCode, errorDescription, validatedURL) => {
+		Log.error(`did-fail-load: ${validatedURL} (${errorCode}: ${errorDescription})`);
+	});
+	mainWindow.webContents.on("did-finish-load", () => {
+		Log.log("did-finish-load: page loaded successfully");
+	});
+	mainWindow.webContents.on("render-process-gone", (event, details) => {
+		Log.error(`render-process-gone: ${JSON.stringify(details)}`);
+	});
+	mainWindow.on("unresponsive", () => {
+		Log.error("BrowserWindow became unresponsive");
+	});
+	mainWindow.on("ready-to-show", () => {
+		Log.log(`ready-to-show: visible=${mainWindow.isVisible()} bounds=${JSON.stringify(mainWindow.getBounds())}`);
+	});
 
 	// Open the DevTools if run with "npm start dev"
 	if (process.argv.includes("dev")) {
