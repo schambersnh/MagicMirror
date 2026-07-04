@@ -3,10 +3,10 @@ module.exports = {
 		{
 			name: "mm",
 			script: "npm",
-			args: "run start:x11",
+			args: "start",
 			cwd: "/home/schambersnh/MagicMirror",
 			env: {
-				DISPLAY: ":0",
+				WAYLAND_DISPLAY: "wayland-0",
 				ELECTRON_ENABLE_GPU: "1"
 			}
 		}
