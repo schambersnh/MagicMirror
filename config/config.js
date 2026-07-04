@@ -193,10 +193,10 @@ let config = {
 			}
 		},
 	],
-	// TEMPORARY diagnostic override - testing if transparent+fullscreen compositing is broken on labwc. Revert after test.
+	// TEMPORARY diagnostic override - testing if xdg-decoration negotiation (frame:true) stalls the labwc compositor handshake. Revert after test.
 	electronOptions: {
 		fullscreen: false,
-		frame: true,
+		frame: false,
 		transparent: false,
 		width: 800,
 		height: 600
