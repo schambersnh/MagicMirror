@@ -159,6 +159,10 @@ Module.register("down-payment-saver", {
 		console.log("account balance", this.accountBalance);
 		console.log("goal", goal);
 
+		if (!goal) {
+			return;
+		}
+
 		let oneBrick = goal / 100;
 		let bricksDrawn = 0;
 		let brickWidth = rectangle.width / 10;
