@@ -193,14 +193,6 @@ let config = {
 			}
 		},
 	],
-	// TEMPORARY diagnostic override - testing if xdg-decoration negotiation (frame:true) stalls the labwc compositor handshake. Revert after test.
-	electronOptions: {
-		fullscreen: false,
-		frame: false,
-		transparent: false,
-		width: 800,
-		height: 600
-	}
 };
 
 /*************** DO NOT EDIT THE LINE BELOW ***************/

@@ -88,15 +88,6 @@ function createWindow () {
 	// Create the browser window.
 	mainWindow = new BrowserWindow(electronOptions);
 
-	// TEMPORARY diagnostic - bypass ready-to-show gating to test if content paints at all. Revert after debugging.
-	setTimeout(() => {
-		if (mainWindow) {
-			console.log("[electron diagnostic] forcing show() without waiting for ready-to-show");
-			mainWindow.show();
-			console.log(`[electron diagnostic] after forced show(): visible=${mainWindow.isVisible()} bounds=${JSON.stringify(mainWindow.getBounds())}`);
-		}
-	}, 3000);
-
 	/*
 	 * and load the index.html of the app.
 	 * If config.address is not defined or is an empty string (listening on all interfaces), connect to localhost
@@ -163,13 +154,6 @@ function createWindow () {
 		mainWindow.show();
 		console.log(`[electron diagnostic] after show(): visible=${mainWindow.isVisible()} bounds=${JSON.stringify(mainWindow.getBounds())}`);
 	});
-
-	// TEMPORARY diagnostic - confirm whether ready-to-show ever fires at all. Revert after debugging.
-	setTimeout(() => {
-		if (mainWindow && !mainWindow.isVisible()) {
-			console.log("[electron diagnostic] 10s after createWindow: window still NOT visible, ready-to-show likely never fired");
-		}
-	}, 10000);
 }
 
 // Quit when all windows are closed.
