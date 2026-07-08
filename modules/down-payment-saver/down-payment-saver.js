@@ -22,6 +22,9 @@ Module.register("down-payment-saver", {
 
 		let rectangle = this.drawBase(context, wrapperWidth, wrapperHeight);
 		this.drawRoof(context, rectangle);
+
+		let percent = this.totalDebt ? Math.min(100, (this.accountBalance / this.totalDebt) * 100) : 0;
+		this.drawMilestones(context, rectangle, percent, wrapperWidth, wrapperHeight);
 		this.drawBricks(context, rectangle, this.totalDebt);
 
 		wrapper.appendChild(canv);
@@ -153,6 +156,86 @@ Module.register("down-payment-saver", {
 		context.lineTo(rectangle.xLocation + rectangle.width * 0.7 + chimneyWidth, rectangle.yLocation - roofHeight * 0.5);
 		context.closePath();
 		context.stroke();
+	},
+
+	//milestone decorations that appear as progress increases
+	drawMilestones: function (context, rectangle, percent, wrapperWidth, wrapperHeight) {
+		if (percent >= 25) {
+			this.drawBushes(context, rectangle);
+		}
+		if (percent >= 50) {
+			this.drawSmoke(context, rectangle);
+		}
+		if (percent >= 75) {
+			this.drawSun(context, wrapperWidth);
+		}
+		if (percent >= 100) {
+			this.drawConfetti(context, wrapperWidth, wrapperHeight);
+		}
+	},
+
+	drawBushes: function (context, rectangle) {
+		let groundY = rectangle.yLocation + rectangle.height;
+		let bushRadius = rectangle.width / 10;
+
+		let drawBush = centerX => {
+			context.beginPath();
+			context.fillStyle = "green";
+			context.arc(centerX, groundY, bushRadius, Math.PI, 0);
+			context.fill();
+			context.closePath();
+		};
+
+		drawBush(rectangle.xLocation - bushRadius);
+		drawBush(rectangle.xLocation + rectangle.width + bushRadius);
+	},
+
+	drawSmoke: function (context, rectangle) {
+		let roofHeight = rectangle.height / 1.5;
+		let chimneyTopX = rectangle.xLocation + rectangle.width * 0.7 + rectangle.width / 20;
+		let chimneyTopY = rectangle.yLocation - roofHeight * 0.68 - rectangle.height / 8;
+
+		context.fillStyle = "rgba(200, 200, 200, 0.6)";
+		[0, 1, 2].forEach(i => {
+			context.beginPath();
+			context.arc(chimneyTopX + i * 6, chimneyTopY - i * 18, 8 + i * 3, 0, Math.PI * 2);
+			context.fill();
+			context.closePath();
+		});
+	},
+
+	drawSun: function (context, wrapperWidth) {
+		let centerX = wrapperWidth * 0.85;
+		let centerY = 40;
+		let radius = 20;
+
+		context.beginPath();
+		context.fillStyle = "yellow";
+		context.arc(centerX, centerY, radius, 0, Math.PI * 2);
+		context.fill();
+		context.closePath();
+
+		context.strokeStyle = "yellow";
+		context.lineWidth = 3;
+		for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
+			context.beginPath();
+			context.moveTo(centerX + Math.cos(angle) * (radius + 5), centerY + Math.sin(angle) * (radius + 5));
+			context.lineTo(centerX + Math.cos(angle) * (radius + 15), centerY + Math.sin(angle) * (radius + 15));
+			context.closePath();
+			context.stroke();
+		}
+	},
+
+	drawConfetti: function (context, wrapperWidth, wrapperHeight) {
+		let colors = ["#e63946", "#f1c40f", "#2ecc71", "#3498db", "#9b59b6"];
+
+		for (let i = 0; i < 60; i++) {
+			context.beginPath();
+			context.fillStyle = colors[i % colors.length];
+			context.rect(Math.random() * wrapperWidth, Math.random() * wrapperHeight, 6, 6);
+			context.fill();
+			context.closePath();
+		}
 	},
 
 	drawBricks: function (context, rectangle, goal) {

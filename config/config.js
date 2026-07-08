@@ -127,12 +127,23 @@ let config = {
 			}
 		},
 		{
-			module: "MMM-AVStock",
+			module: "MMM-Jast",
 			position: "top_right",
 			config: {
-				symbols: ["VOO", "NFLX", "AAPL", "PANW", "MSFT"],
-				alias: ["VOO", "NETFLIX", "APPLE", "PANW", "MICROSOFT"],
-				mode: "table"
+				displayMode: "none",
+				maxWidth: "260px",
+				showColors: true,
+				showCurrency: false,
+				showChangePercent: false,
+				showChangeValue: false,
+				updateIntervalInSeconds: 300,
+				stocks: [
+					{ name: "VOO", symbol: "VOO" },
+					{ name: "NETFLIX", symbol: "NFLX" },
+					{ name: "APPLE", symbol: "AAPL" },
+					{ name: "PANW", symbol: "PANW" },
+					{ name: "MICROSOFT", symbol: "MSFT" }
+				]
 			}
 		},
 		{
