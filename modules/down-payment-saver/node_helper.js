@@ -1,5 +1,10 @@
 var NodeHelper = require("node_helper");
 
+// Electron 11 bundles Node v12 which lacks native fetch
+if (!globalThis.fetch) {
+	globalThis.fetch = require("node-fetch");
+}
+
 const SHEET_ID = "1hCJhW-7l456P41VjSgX3767eae5QMjtfT0VNpNFNLGI";
 // B4 = total debt, B5 = Robinhood balance
 // Sheet must be shared as "Anyone with the link can view"
