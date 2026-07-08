@@ -148,36 +148,98 @@ Module.register("down-payment-saver", {
 		context.stroke();
 	},
 
-	//milestone decorations that appear as progress increases
+	//milestone decorations that appear every 10% of progress
 	drawMilestones: function (context, rectangle, percent, wrapperWidth, wrapperHeight) {
-		if (percent >= 25) {
-			this.drawBushes(context, rectangle);
+		if (percent >= 10) {
+			this.drawSapling(context, rectangle);
+		}
+		if (percent >= 20) {
+			this.drawBushLeft(context, rectangle);
+		}
+		if (percent >= 30) {
+			this.drawBushRight(context, rectangle);
+		}
+		if (percent >= 40) {
+			this.drawMailbox(context, rectangle);
 		}
 		if (percent >= 50) {
 			this.drawSmoke(context, rectangle);
 		}
-		if (percent >= 75) {
-			this.drawSun(context, wrapperWidth);
+		if (percent >= 60) {
+			this.drawBirds(context, rectangle);
+		}
+		if (percent >= 70) {
+			this.drawSun(context, rectangle);
+		}
+		if (percent >= 80) {
+			this.drawClouds(context, rectangle);
+		}
+		if (percent >= 90) {
+			this.drawFence(context, rectangle);
 		}
 		if (percent >= 100) {
 			this.drawConfetti(context, wrapperWidth, wrapperHeight);
 		}
 	},
 
-	drawBushes: function (context, rectangle) {
+	drawSapling: function (context, rectangle) {
 		let groundY = rectangle.yLocation + rectangle.height;
 		let bushRadius = rectangle.width / 10;
+		let stemX = rectangle.xLocation - bushRadius;
 
-		let drawBush = centerX => {
-			context.beginPath();
-			context.fillStyle = "#2e7d32";
-			context.arc(centerX, groundY, bushRadius, Math.PI, 0);
-			context.fill();
-			context.closePath();
-		};
+		context.beginPath();
+		context.strokeStyle = "#5c3a21";
+		context.lineWidth = 2;
+		context.moveTo(stemX, groundY);
+		context.lineTo(stemX, groundY - bushRadius * 0.8);
+		context.stroke();
+		context.closePath();
 
-		drawBush(rectangle.xLocation - bushRadius);
-		drawBush(rectangle.xLocation + rectangle.width + bushRadius);
+		context.beginPath();
+		context.fillStyle = "#4caf50";
+		context.arc(stemX, groundY - bushRadius * 0.9, bushRadius / 3, 0, Math.PI * 2);
+		context.fill();
+		context.closePath();
+	},
+
+	drawBush: function (context, centerX, groundY, bushRadius) {
+		context.beginPath();
+		context.fillStyle = "#2e7d32";
+		context.arc(centerX, groundY, bushRadius, Math.PI, 0);
+		context.fill();
+		context.closePath();
+	},
+
+	drawBushLeft: function (context, rectangle) {
+		let groundY = rectangle.yLocation + rectangle.height;
+		let bushRadius = rectangle.width / 10;
+		this.drawBush(context, rectangle.xLocation - bushRadius, groundY, bushRadius);
+	},
+
+	drawBushRight: function (context, rectangle) {
+		let groundY = rectangle.yLocation + rectangle.height;
+		let bushRadius = rectangle.width / 10;
+		this.drawBush(context, rectangle.xLocation + rectangle.width + bushRadius, groundY, bushRadius);
+	},
+
+	drawMailbox: function (context, rectangle) {
+		let groundY = rectangle.yLocation + rectangle.height;
+		let bushRadius = rectangle.width / 10;
+		let postX = rectangle.xLocation + rectangle.width + bushRadius * 2.5;
+		let postHeight = bushRadius * 1.2;
+		let postWidth = 4;
+
+		context.beginPath();
+		context.fillStyle = "#6d6d6d";
+		context.rect(postX - postWidth / 2, groundY - postHeight, postWidth, postHeight);
+		context.fill();
+		context.closePath();
+
+		context.beginPath();
+		context.fillStyle = "#3f6b8f";
+		context.rect(postX - bushRadius / 3, groundY - postHeight - bushRadius / 3, bushRadius * 0.7, bushRadius / 3);
+		context.fill();
+		context.closePath();
 	},
 
 	drawSmoke: function (context, rectangle) {
@@ -194,8 +256,9 @@ Module.register("down-payment-saver", {
 		});
 	},
 
-	drawSun: function (context, wrapperWidth) {
-		let centerX = wrapperWidth * 0.85;
+	drawSun: function (context, rectangle) {
+		//anchored to the house's own rectangle (not the full screen width) so it stays clear of other modules regardless of screen size
+		let centerX = rectangle.xLocation + rectangle.width * 1.22;
 		let centerY = 40;
 		let radius = 20;
 
@@ -213,6 +276,69 @@ Module.register("down-payment-saver", {
 			context.lineTo(centerX + Math.cos(angle) * (radius + 15), centerY + Math.sin(angle) * (radius + 15));
 			context.closePath();
 			context.stroke();
+		}
+	},
+
+	drawBirds: function (context, rectangle) {
+		//anchored to the house's own rectangle (not the full screen width) so it stays clear of other modules regardless of screen size
+		let baseX = rectangle.xLocation - rectangle.width * 0.2;
+		let birdPositions = [
+			{ x: baseX, y: 75 },
+			{ x: baseX + rectangle.width * 0.3, y: 90 },
+			{ x: baseX + rectangle.width * 0.6, y: 70 }
+		];
+
+		context.strokeStyle = "#ffffff";
+		context.lineWidth = 2;
+		birdPositions.forEach(pos => {
+			context.beginPath();
+			context.arc(pos.x - 6, pos.y, 6, Math.PI, 0);
+			context.arc(pos.x + 6, pos.y, 6, Math.PI, 0);
+			context.stroke();
+			context.closePath();
+		});
+	},
+
+	drawClouds: function (context, rectangle) {
+		//anchored to the house's own rectangle (not the full screen width) so it stays clear of other modules regardless of screen size
+		let cloudPositions = [
+			{ x: rectangle.xLocation - rectangle.width * 0.2, y: 85 },
+			{ x: rectangle.xLocation + rectangle.width * 1.17, y: 130 }
+		];
+
+		context.fillStyle = "rgba(255, 255, 255, 0.85)";
+		cloudPositions.forEach(pos => {
+			[0, 1, 2].forEach(i => {
+				context.beginPath();
+				context.arc(pos.x + i * 16, pos.y - (i === 1 ? 8 : 0), 14, 0, Math.PI * 2);
+				context.fill();
+				context.closePath();
+			});
+		});
+	},
+
+	drawFence: function (context, rectangle) {
+		let groundY = rectangle.yLocation + rectangle.height;
+		let bushRadius = rectangle.width / 10;
+		let fenceStartX = rectangle.xLocation - bushRadius * 2;
+		let fenceEndX = rectangle.xLocation + rectangle.width + bushRadius * 2;
+		let postHeight = 14;
+		let postSpacing = 12;
+
+		context.strokeStyle = "#c9b896";
+		context.lineWidth = 3;
+		context.beginPath();
+		context.moveTo(fenceStartX, groundY - postHeight / 2);
+		context.lineTo(fenceEndX, groundY - postHeight / 2);
+		context.stroke();
+		context.closePath();
+
+		for (let x = fenceStartX; x <= fenceEndX; x += postSpacing) {
+			context.beginPath();
+			context.moveTo(x, groundY);
+			context.lineTo(x, groundY - postHeight);
+			context.stroke();
+			context.closePath();
 		}
 	},
 
