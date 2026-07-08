@@ -7,3 +7,6 @@
 [submodule "modules/MMM-MyScoreboard"]
 	path = modules/MMM-MyScoreboard
 	url = https://github.com/dathbe/MMM-MyScoreboard
+[submodule "modules/MMM-AVStock"]
+	path = modules/MMM-AVStock
+	url = https://github.com/lavolp3/MMM-AVStock

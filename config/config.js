@@ -127,6 +127,15 @@ let config = {
 			}
 		},
 		{
+			module: "MMM-AVStock",
+			position: "top_right",
+			config: {
+				symbols: ["VOO", "NFLX", "AAPL", "PANW", "MSFT"],
+				alias: ["VOO", "NETFLIX", "APPLE", "PANW", "MICROSOFT"],
+				mode: "table"
+			}
+		},
+		{
 			module: "down-payment-saver",
 			position: "middle_center",
 			config: {
