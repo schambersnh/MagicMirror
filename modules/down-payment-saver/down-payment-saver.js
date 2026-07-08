@@ -76,16 +76,19 @@ Module.register("down-payment-saver", {
 
 		let rectHeight = wrapperHeight / 2;
 		let rectWidth = wrapperWidth / 4;
+		let x = wrapperWidth / 2 - rectWidth / 2;
+		let y = wrapperHeight - rectHeight - 10;
 
-		context.rect(wrapperWidth / 2 - rectWidth / 2, wrapperHeight - rectHeight - 10, rectWidth, rectHeight);
-		context.fillStyle = "white";
-		context.strokeStyle = "white";
+		context.rect(x, y, rectWidth, rectHeight);
+		context.fillStyle = "#d8b48a";
+		context.strokeStyle = "#5c3a21";
 		context.lineWidth = 10;
+		context.fill();
 		context.closePath();
 		context.stroke();
 		return {
-			xLocation: wrapperWidth / 2 - rectWidth / 2,
-			yLocation: wrapperHeight - rectHeight - 10,
+			xLocation: x,
+			yLocation: y,
 			width: rectWidth,
 			height: rectHeight
 		};
@@ -99,62 +102,49 @@ Module.register("down-payment-saver", {
 		let chimneyWidth = rectangle.width / 10;
 		let chimneyHeight = rectangle.height / 8;
 
-		//first line
+		//filled roof triangle
 		context.beginPath();
-		context.lineJoin = "round";
 		context.moveTo(rectangle.xLocation - roofOffset, rectangle.yLocation);
 		context.lineTo(rectangle.xLocation + lineOffset, rectangle.yLocation - roofHeight);
+		context.lineTo(rectangle.xLocation + rectangle.width + roofOffset, rectangle.yLocation);
 		context.closePath();
+		context.fillStyle = "#7a1f1f";
+		context.fill();
+		context.strokeStyle = "#4a1010";
+		context.lineWidth = 4;
 		context.stroke();
 
+		//eave notches
 		context.beginPath();
 		context.moveTo(rectangle.xLocation - roofOffset, rectangle.yLocation);
 		context.lineTo(rectangle.xLocation - roofOffset + lineSideOffset, rectangle.yLocation + lineSideOffset);
-		context.closePath();
-		context.stroke();
-
-		context.beginPath();
-		context.moveTo(rectangle.xLocation - roofOffset + lineSideOffset, rectangle.yLocation + lineSideOffset);
 		context.lineTo(rectangle.xLocation, rectangle.yLocation);
 		context.closePath();
-		context.stroke();
-
-		//second line
-		context.beginPath();
-		context.moveTo(rectangle.xLocation + lineOffset, rectangle.yLocation - roofHeight);
-		context.lineTo(rectangle.xLocation + rectangle.width + roofOffset, rectangle.yLocation);
-		context.closePath();
+		context.fillStyle = "#5c1717";
+		context.fill();
 		context.stroke();
 
 		context.beginPath();
 		context.moveTo(rectangle.xLocation + rectangle.width + roofOffset, rectangle.yLocation);
 		context.lineTo(rectangle.xLocation + rectangle.width + roofOffset - lineSideOffset, rectangle.yLocation + lineSideOffset);
-		context.closePath();
-		context.stroke();
-
-		context.beginPath();
-		context.moveTo(rectangle.xLocation + rectangle.width + roofOffset - lineSideOffset, rectangle.yLocation + lineSideOffset);
 		context.lineTo(rectangle.xLocation + rectangle.width, rectangle.yLocation);
 		context.closePath();
+		context.fillStyle = "#5c1717";
+		context.fill();
 		context.stroke();
 
 		//chimney
 		context.beginPath();
-		context.moveTo(rectangle.xLocation + rectangle.width * 0.7, rectangle.yLocation - roofHeight * 0.68);
-		context.lineTo(rectangle.xLocation + rectangle.width * 0.7, rectangle.yLocation - roofHeight * 0.68 - chimneyHeight);
-		context.closePath();
-		context.stroke();
-
-		context.beginPath();
-		context.moveTo(rectangle.xLocation + rectangle.width * 0.7, rectangle.yLocation - roofHeight * 0.68 - chimneyHeight);
-		context.lineTo(rectangle.xLocation + rectangle.width * 0.7 + chimneyWidth, rectangle.yLocation - roofHeight * 0.68 - chimneyHeight);
-		context.closePath();
-		context.stroke();
-
-		context.beginPath();
-		context.moveTo(rectangle.xLocation + rectangle.width * 0.7 + chimneyWidth, rectangle.yLocation - roofHeight * 0.68 - chimneyHeight);
-		context.lineTo(rectangle.xLocation + rectangle.width * 0.7 + chimneyWidth, rectangle.yLocation - roofHeight * 0.5);
-		context.closePath();
+		context.rect(
+			rectangle.xLocation + rectangle.width * 0.7,
+			rectangle.yLocation - roofHeight * 0.68 - chimneyHeight,
+			chimneyWidth,
+			roofHeight * 0.68 + chimneyHeight - roofHeight * 0.5
+		);
+		context.fillStyle = "#8a5a3a";
+		context.fill();
+		context.strokeStyle = "#4a1010";
+		context.lineWidth = 3;
 		context.stroke();
 	},
 
@@ -180,7 +170,7 @@ Module.register("down-payment-saver", {
 
 		let drawBush = centerX => {
 			context.beginPath();
-			context.fillStyle = "green";
+			context.fillStyle = "#2e7d32";
 			context.arc(centerX, groundY, bushRadius, Math.PI, 0);
 			context.fill();
 			context.closePath();
@@ -195,7 +185,7 @@ Module.register("down-payment-saver", {
 		let chimneyTopX = rectangle.xLocation + rectangle.width * 0.7 + rectangle.width / 20;
 		let chimneyTopY = rectangle.yLocation - roofHeight * 0.68 - rectangle.height / 8;
 
-		context.fillStyle = "rgba(200, 200, 200, 0.6)";
+		context.fillStyle = "rgba(230, 230, 230, 0.7)";
 		[0, 1, 2].forEach(i => {
 			context.beginPath();
 			context.arc(chimneyTopX + i * 6, chimneyTopY - i * 18, 8 + i * 3, 0, Math.PI * 2);
@@ -210,12 +200,12 @@ Module.register("down-payment-saver", {
 		let radius = 20;
 
 		context.beginPath();
-		context.fillStyle = "yellow";
+		context.fillStyle = "#ffd54f";
 		context.arc(centerX, centerY, radius, 0, Math.PI * 2);
 		context.fill();
 		context.closePath();
 
-		context.strokeStyle = "yellow";
+		context.strokeStyle = "#ffd54f";
 		context.lineWidth = 3;
 		for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
 			context.beginPath();
@@ -239,9 +229,6 @@ Module.register("down-payment-saver", {
 	},
 
 	drawBricks: function (context, rectangle, goal) {
-		console.log("account balance", this.accountBalance);
-		console.log("goal", goal);
-
 		if (!goal) {
 			return;
 		}
@@ -259,22 +246,26 @@ Module.register("down-payment-saver", {
 				brickYLocation -= brickHeight;
 				brickXLocation = rectangle.xLocation;
 			}
-			this.drawBrick(context, brickXLocation, brickYLocation, brickWidth, brickHeight);
+			this.drawBrick(context, brickXLocation, brickYLocation, brickWidth, brickHeight, bricksDrawn);
 			bricksDrawn++;
 			brickXLocation += brickWidth;
 		}
 	},
 
-	drawBrick: function (context, xLocation, yLocation, width, height) {
-		context.beginPath();
+	drawBrick: function (context, xLocation, yLocation, width, height, brickIndex) {
+		//deterministic pseudo-random shading based on brick index so bricks look hand-laid
+		let shadeSeed = (brickIndex * 37) % 5;
+		let brickColors = ["#8a3324", "#a3402c", "#7a2b1d", "#95382a", "#8f3527"];
 
+		context.beginPath();
 		context.rect(xLocation, yLocation, width, height);
-		context.fillStyle = "black";
-		//context.fillStyle = "#640e01";
-		context.strokeStyle = "white";
+		context.fillStyle = brickColors[shadeSeed];
 		context.fill();
-		context.lineWidth = 10;
 		context.closePath();
+
+		//mortar lines
+		context.strokeStyle = "#e0d8c8";
+		context.lineWidth = 3;
 		context.stroke();
 	},
 
