@@ -80,8 +80,8 @@ Module.register("down-payment-saver", {
 		let y = wrapperHeight - rectHeight - 10;
 
 		context.rect(x, y, rectWidth, rectHeight);
-		context.fillStyle = "#d8b48a";
-		context.strokeStyle = "#5c3a21";
+		context.fillStyle = "#9cc3e0";
+		context.strokeStyle = "#3f6b8f";
 		context.lineWidth = 10;
 		context.fill();
 		context.closePath();
@@ -108,9 +108,9 @@ Module.register("down-payment-saver", {
 		context.lineTo(rectangle.xLocation + lineOffset, rectangle.yLocation - roofHeight);
 		context.lineTo(rectangle.xLocation + rectangle.width + roofOffset, rectangle.yLocation);
 		context.closePath();
-		context.fillStyle = "#7a1f1f";
+		context.fillStyle = "#4a5a68";
 		context.fill();
-		context.strokeStyle = "#4a1010";
+		context.strokeStyle = "#2c3841";
 		context.lineWidth = 4;
 		context.stroke();
 
@@ -120,7 +120,7 @@ Module.register("down-payment-saver", {
 		context.lineTo(rectangle.xLocation - roofOffset + lineSideOffset, rectangle.yLocation + lineSideOffset);
 		context.lineTo(rectangle.xLocation, rectangle.yLocation);
 		context.closePath();
-		context.fillStyle = "#5c1717";
+		context.fillStyle = "#38454e";
 		context.fill();
 		context.stroke();
 
@@ -129,7 +129,7 @@ Module.register("down-payment-saver", {
 		context.lineTo(rectangle.xLocation + rectangle.width + roofOffset - lineSideOffset, rectangle.yLocation + lineSideOffset);
 		context.lineTo(rectangle.xLocation + rectangle.width, rectangle.yLocation);
 		context.closePath();
-		context.fillStyle = "#5c1717";
+		context.fillStyle = "#38454e";
 		context.fill();
 		context.stroke();
 
@@ -235,16 +235,17 @@ Module.register("down-payment-saver", {
 
 		let oneBrick = goal / 100;
 		let bricksDrawn = 0;
-		let brickWidth = rectangle.width / 10;
+		let wallBorderInset = 5; //half of drawBase's stroke lineWidth, which straddles the wall edge
+		let brickWidth = (rectangle.width - wallBorderInset * 2) / 10;
 		let brickHeight = rectangle.height / 10;
-		let brickXLocation = rectangle.xLocation;
+		let brickXLocation = rectangle.xLocation + wallBorderInset;
 		let brickYLocation = rectangle.yLocation + rectangle.height - brickHeight;
 
 		for (let i = oneBrick; i <= this.accountBalance; i += oneBrick) {
 			if (bricksDrawn > 0 && bricksDrawn % 10 === 0) {
 				//move the row up
 				brickYLocation -= brickHeight;
-				brickXLocation = rectangle.xLocation;
+				brickXLocation = rectangle.xLocation + wallBorderInset;
 			}
 			this.drawBrick(context, brickXLocation, brickYLocation, brickWidth, brickHeight, bricksDrawn);
 			bricksDrawn++;
@@ -255,7 +256,7 @@ Module.register("down-payment-saver", {
 	drawBrick: function (context, xLocation, yLocation, width, height, brickIndex) {
 		//deterministic pseudo-random shading based on brick index so bricks look hand-laid
 		let shadeSeed = (brickIndex * 37) % 5;
-		let brickColors = ["#8a3324", "#a3402c", "#7a2b1d", "#95382a", "#8f3527"];
+		let brickColors = ["#b06a4f", "#c17a5c", "#a15f46", "#b87257", "#a66650"];
 
 		context.beginPath();
 		context.rect(xLocation, yLocation, width, height);
