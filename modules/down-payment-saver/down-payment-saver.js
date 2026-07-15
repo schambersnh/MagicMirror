@@ -33,6 +33,7 @@ Module.register("down-payment-saver", {
 
 	start: function () {
 		this.getAccountBalance();
+		this.scheduleUpdate();
 	},
 
 	getAccountBalance: function () {
@@ -43,7 +44,7 @@ Module.register("down-payment-saver", {
 	scheduleUpdate: function () {
 		var self = this;
 		// Refresh time should not be less than 5 minutes
-		var delay = config.refreshTime;
+		var delay = this.config.refreshTime;
 		setInterval(function () {
 			self.getAccountBalance();
 		}, delay);
